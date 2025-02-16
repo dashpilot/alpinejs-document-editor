@@ -9,7 +9,7 @@ Includes:
 
 ## Preview
 
-<img src="preview.png" />
+<img src="preview.png" style="width: 50%" />
 
 ## Demo
 
