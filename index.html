@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Visual Page Editor</title>
+    </head>
+    <body class="bg-gray-100">
+        <div x-data="pageEditor" class="min-h-screen">
+            <!-- Top Navigation -->
+            <nav class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 class="text-xl font-semibold text-gray-800">DocMatic</h1>
+                    <div class="flex gap-2">
+                        <div class="flex gap-0.5 border border-gray-300 rounded overflow-hidden">
+                            <button class="px-4 py-2 hover:bg-gray-100" @click="preview">
+                                <template x-if="previewActive">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                        <path d="m15 18-.722-3.25" />
+                                        <path d="M2 8a10.645 10.645 0 0 0 20 0" />
+                                        <path d="m20 15-1.726-2.05" />
+                                        <path d="m4 15 1.726-2.05" />
+                                        <path d="m9 18 .722-3.25" />
+                                    </svg>
+                                </template>
+                                <template x-if="!previewActive">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </template></button
+                            ><button class="px-4 py-2 hover:bg-gray-100 border-l" @click="newDoc">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                    <path d="M5 12h14" />
+                                    <path d="M12 5v14" />
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100" @click="save">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+                                <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" />
+                                <path d="M7 3v4a1 1 0 0 0 1 1h7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="max-w-7xl mx-auto px-4 py-6 flex gap-6">
+                <!-- Left Sidebar - Content Blocks -->
+                <div class="w-64 flex-shrink-0">
+                    <h2 class="text-lg font-medium text-gray-700 mb-4">Content Blocks</h2>
+                    <div x-ref="sidebarBlocks" class="space-y-3">
+                        <div class="sidebar-item" data-type="heading">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                                </svg>
+                                Heading
+                            </div>
+                        </div>
+                        <div class="sidebar-item" data-type="paragraph">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                                </svg>
+                                Paragraph
+                            </div>
+                        </div>
+                        <div class="sidebar-item" data-type="image">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Image
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="flex-1">
+                    <div x-ref="mainContent" class="min-h-[600px] bg-white rounded-lg shadow-sm p-6">
+                        <div x-show="blocks.length === 0" class="text-center text-gray-500 py-8">Drag blocks here to start building your page</div>
+                        <template x-for="block in blocks" :key="block.id">
+                            <div :class="{ 'content-block': true, 'ring-2 ring-blue-500': selectedBlock?.id === block.id }" :data-id="block.id" :data-type="block.type" @click="selectBlock(block)">
+                                <div class="flex items-start">
+                                    <!-- Content -->
+                                    <div class="flex-1">
+                                        <div x-show="block.type === 'heading'">
+                                            <h2 x-text="block.content" class="text-2xl font-bold"></h2>
+                                        </div>
+                                        <div x-show="block.type === 'paragraph'">
+                                            <div x-html="block.content" class="text-gray-700"></div>
+                                        </div>
+                                        <div x-show="block.type === 'image'" class="relative">
+                                            <img :src="block.content" class="max-w-full h-auto rounded" />
+                                        </div>
+                                    </div>
+                                    <!-- Block Controls -->
+                                    <div class="flex gap-1 ml-2 block-controls">
+                                        <button @click.stop="moveBlockUp(block.id)" :disabled="blocks.indexOf(block) === 0" :class="{ 'opacity-50 cursor-not-allowed': blocks.indexOf(block) === 0 }" class="p-1 hover:bg-gray-100 rounded" title="Move Up">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                            </svg>
+                                        </button>
+                                        <button @click.stop="moveBlockDown(block.id)" :disabled="blocks.indexOf(block) === blocks.length - 1" :class="{ 'opacity-50 cursor-not-allowed': blocks.indexOf(block) === blocks.length - 1 }" class="p-1 hover:bg-gray-100 rounded" title="Move Down">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+                                        <button @click.stop="deleteBlock(block.id)" class="p-1 hover:bg-red-100 text-red-600 rounded" title="Delete">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar - Properties -->
+                <div class="w-72 flex-shrink-0" spellcheck="false">
+                    <h2 class="text-lg font-medium text-gray-700 mb-4">Properties</h2>
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <template x-if="selectedBlock">
+                            <div class="properties-panel space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                                    <template x-if="selectedBlock.type === 'image'">
+                                        <div class="mt-1 space-y-2">
+                                            <input type="file" accept="image/*" x-ref="imageInput" @change="handleImageUpload($event)" class="hidden" />
+                                            <button @click="triggerImageUpload(selectedBlock.id)" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Select Image</button>
+                                        </div>
+                                    </template>
+                                    <template x-if="selectedBlock.type === 'heading'">
+                                        <input type="text" x-model="selectedBlock.content" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    </template>
+                                    <template x-if="selectedBlock.type === 'paragraph'">
+                                        <div class="space-y-2">
+                                            <div class="flex gap-1 border-b pb-2">
+                                                <button @click="execCommand('bold')" class="p-1 hover:bg-gray-100 rounded" title="Bold">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8" /></svg>
+                                                </button>
+                                                <button @click="execCommand('italic')" class="p-1 hover:bg-gray-100 rounded" title="Italic">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                                        <line x1="19" x2="10" y1="4" y2="4" />
+                                                        <line x1="14" x2="5" y1="20" y2="20" />
+                                                        <line x1="15" x2="9" y1="4" y2="20" />
+                                                    </svg>
+                                                </button>
+                                                <button @click="addLink()" class="p-1 hover:bg-gray-100 rounded" title="Add Link">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div x-ref="richTextEditor" contenteditable="true" @input="handleRichTextChange" class="min-h-[150px] p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!selectedBlock">
+                            <p class="text-gray-500 text-sm">Select a block to edit its properties</p>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="/src/main.js"></script>
+    </body>
+</html>
