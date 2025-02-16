@@ -1,5 +1,12 @@
 # Alpine.js drag-and-drop document editor
 
+Includes:
+
+-   Title Editor
+-   Rich text editor for paragraphs (bold, italic, link)
+-   Image upload and resize
+-   preview, create new document, save document
+
 ## Preview
 
 <img src="preview.png" />
